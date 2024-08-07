@@ -12,6 +12,7 @@ def get_petrol_station_id(db: Session, petrol_station_id: int):
 
 
 def get_petrol_station_by_bounding_box(db: Session, box: BoundingBox):
+    print(box)
     petrol_stations = db.query(PetrolStation).filter(
         and_(
             PetrolStation.location_y >= box.sw_lat,
