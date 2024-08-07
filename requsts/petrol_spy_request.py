@@ -32,8 +32,6 @@ def init_param(line):
     return param_dict
 
 
-
-
 def read_local_spy_petrol_file():
     # read the hub file to fetch the data
     try:

@@ -1,14 +1,13 @@
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, HTTPException, APIRouter
+from fastapi import Depends, HTTPException, APIRouter, Query
 from sqlalchemy.orm import Session
 
 from schemas import petrol_station_schema
 from crud import petrol_station_crud
-from database import engine, SessionLocal, Base
-from schemas.bounding_box import BoundingBox
+from database import SessionLocal
 from schemas.response_body import ResponseBody
-from services.petrol_station_service import get_station_by_bounding_boxes
+from services.petrol_station_service import get_station_by_route
 
 router = APIRouter()
 
@@ -35,14 +34,15 @@ def read_petrol_station(petrol_station_id: int, db: Session = Depends(get_db)):
     return read_petrol_station
 
 
-@router.get("/petrol-station/bounding-boxes")
-def get_petrol_station_by_box(petrol_station_box_list: list,
+@router.get("/petrol-station")
+def get_petrol_station_by_box(src_lat: float = Query(..., alias="srcLat", description="Source latitude"),
+                              src_lng: float = Query(..., alias="srcLng", description="Source longitude"),
+                              des_lat: float = Query(..., alias="desLat", description="Destination latitude"),
+                              des_lng: float = Query(..., alias="desLng", description="Destination longitude"),
                               db: Session = Depends(get_db)):
-    petrol_station_box_list = get_station_by_bounding_boxes(db, petrol_station_box_list)
-    print(petrol_station_box_list)
-    result = ResponseBody(body=petrol_station_box_list, size=len(petrol_station_box_list), message="success",
-                          code=200)
-
+    # print(src_lat, src_lng, des_lat, des_lng);
+    petrol_station_list = get_station_by_route(db, src_lat, src_lng, des_lat, des_lng)
+    result = ResponseBody(body=petrol_station_list, size=len([]), message="success", code=200)
     return result
 
 
