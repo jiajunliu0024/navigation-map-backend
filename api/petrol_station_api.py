@@ -40,9 +40,8 @@ def get_petrol_station_by_box(src_lat: float = Query(..., alias="srcLat", descri
                               des_lat: float = Query(..., alias="desLat", description="Destination latitude"),
                               des_lng: float = Query(..., alias="desLng", description="Destination longitude"),
                               db: Session = Depends(get_db)):
-    # print(src_lat, src_lng, des_lat, des_lng);
     petrol_station_list = get_station_by_route(db, src_lat, src_lng, des_lat, des_lng)
-    result = ResponseBody(body=petrol_station_list, size=len([]), message="success", code=200)
+    result = ResponseBody(body=petrol_station_list, size=len(petrol_station_list), message="success", code=200)
     return result
 
 
