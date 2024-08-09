@@ -15,7 +15,7 @@ def fetch(params):
         # Get JSON data
         data = response.json()
         # Print the JSON data
-        print(f"Failed to retrieve data: {data}")
+        # print(f"Failed to retrieve data: {data}")
         return data
     else:
         print(f"Failed to retrieve data: {response.status_code}")
@@ -46,3 +46,5 @@ def read_local_spy_petrol_file():
 
     except FileNotFoundError:
         print("The file was not found.")
+    except Exception:
+        print("Something went wrong.")

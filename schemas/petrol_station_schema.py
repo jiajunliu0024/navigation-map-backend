@@ -1,4 +1,8 @@
+from typing import List
+
 from pydantic import BaseModel
+
+from schemas.petrol_price_schema import Petrol
 
 
 class PetrolStationBase(BaseModel):
@@ -18,6 +22,7 @@ class PetrolStationBase(BaseModel):
     restrooms: bool
     accessible: bool
     open24: bool
+    petrol_list: List[Petrol]
 
 
 class PetrolStationCreateOrUpdate(PetrolStationBase):
@@ -31,3 +36,7 @@ class PetrolStationCreate(PetrolStationBase):
 class PetrolStation(PetrolStationBase):
     class Config:
         from_attributes = True
+
+
+class PetrolStationWithPetrol(PetrolStationBase):
+    petrol_list: list
