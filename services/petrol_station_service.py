@@ -1,4 +1,4 @@
-from crud import petrol_station_crud
+from crud import petrol_station_crud, petrol_price_crud
 from requsts.google_map_request import get_direction_points
 from schemas.bounding_box import BoundingBox
 import math
@@ -7,14 +7,32 @@ import math
 def get_station_by_route(db, src_lat, src_lon, dest_lat, dest_lon):
     # TODO: increase the efficiency on querying petrol station
     points = get_direction_points(src_lat, src_lon, dest_lat, dest_lon)
-    boxes = computer_bounding_boxes(points, 1500)
+    boxes = computer_bounding_boxes(points, 500)
     petrol_station_box_list = []
     petrol_station_dict = {}
+    # petrol_station_crud.get_petrol_station_by_bounding_boxes_paginated(db, boxes, 50)
     for bounding in boxes:
         per_petrol_station_list = petrol_station_crud.get_petrol_station_by_bounding_box(db, bounding)
         petrol_station_box_list.extend(per_petrol_station_list)
     for petrol_station in petrol_station_box_list:
-        petrol_station_dict[petrol_station.name] = petrol_station
+        petrol_station_dict[petrol_station.id] = petrol_station
+
+    # filter_petrol_station_ids = list(petrol_station_dict.keys())
+    #
+    # # get the petrol by station id
+    # petrol_list = petrol_price_crud.get_petrol_by_station_ids(db, filter_petrol_station_ids)
+    #
+    # petrol_dict = {}
+    #
+    # for petrol in petrol_list:
+    #     if petrol_dict.get(petrol.gas_station_id):
+    #         petrol_dict[petrol.gas_station_id].append(petrol)
+    #     else:
+    #         petrol_dict[petrol.gas_station_id] = [petrol]
+    #
+    # for station_id in petrol_dict.keys():
+    #     petrol_station_dict[station_id].petrol_list = petrol_dict[station_id]
+
     filter_petrol_station = list(petrol_station_dict.values())
     return filter_petrol_station
 

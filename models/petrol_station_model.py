@@ -1,9 +1,12 @@
+from typing import List
+
 from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy.orm import relationship
+
 from database import Base
 
 
 class PetrolStation(Base):
-
     __tablename__ = 'petrol_station'
 
     id = Column(String, primary_key=True, index=True)
@@ -22,3 +25,4 @@ class PetrolStation(Base):
     restrooms = Column(Integer, nullable=False)
     accessible = Column(Integer, nullable=False)
     open24 = Column(Integer, nullable=False)
+    petrol_list = relationship('Petrol', back_populates='petrol_station')

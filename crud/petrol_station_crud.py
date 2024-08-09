@@ -1,10 +1,11 @@
-from sqlalchemy import and_
-from sqlalchemy.orm import Session
+from sqlalchemy import and_, or_
+from sqlalchemy.orm import Session, joinedload
 
 import schemas
 from schemas import petrol_station_schema
 from models.petrol_station_model import PetrolStation
 from schemas.bounding_box import BoundingBox
+from schemas.petrol_station_schema import PetrolStationWithPetrol
 
 
 def get_petrol_station_id(db: Session, petrol_station_id: int):
@@ -12,8 +13,7 @@ def get_petrol_station_id(db: Session, petrol_station_id: int):
 
 
 def get_petrol_station_by_bounding_box(db: Session, box: BoundingBox):
-    print(box)
-    petrol_stations = db.query(PetrolStation).filter(
+    petrol_stations = db.query(PetrolStation).options(joinedload(PetrolStation.petrol_list)).filter(
         and_(
             PetrolStation.location_y >= box.sw_lat,
             PetrolStation.location_y <= box.ne_lat,
@@ -22,6 +22,32 @@ def get_petrol_station_by_bounding_box(db: Session, box: BoundingBox):
         )
     ).all()
     return petrol_stations
+
+
+def get_petrol_station_by_bounding_boxes_paginated(db: Session, boxes: list, batch_size: int = 50):
+    petrol_station_box_list = []
+
+    for i in range(0, len(boxes), batch_size):
+        batch = boxes[i:i + batch_size]
+
+        conditions = [
+            and_(
+                PetrolStation.location_y >= box.sw_lat,
+                PetrolStation.location_y <= box.ne_lat,
+                PetrolStation.location_x >= box.sw_lng,
+                PetrolStation.location_x <= box.ne_lng
+            )
+            for box in batch
+        ]
+
+        query = db.query(PetrolStation).filter(or_(*conditions))
+        batch_results = query.all()
+        petrol_station_box_list.extend(batch_results)
+
+    # Remove duplicates if necessary
+    unique_petrol_station_box_list = list({station.id: station for station in petrol_station_box_list}.values())
+
+    return unique_petrol_station_box_list
 
 
 def page_petrol_station(db: Session, skip: int = 0, limit: int = 10):

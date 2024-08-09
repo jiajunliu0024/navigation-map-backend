@@ -4,6 +4,7 @@ from starlette.middleware.cors import CORSMiddleware
 from database import engine, Base
 from api.petrol_station_api import router as petrol_station_router
 from api.petrol_price_api import router as petrol_price_router
+from requsts.petrol_spy_request import read_local_spy_petrol_file
 
 app = FastAPI()
 
@@ -17,11 +18,6 @@ app.add_middleware(
 
 app.include_router(petrol_station_router, prefix="/api/v1", tags=["Petrol Stations"])
 app.include_router(petrol_price_router, prefix="/api/v1", tags=["Petrol Price"])
-# Create the database tables
-# @asynccontextmanager
-# async def lifespan():
-#     Base.metadata.create_all(bind=engine)
-# # Dependency to get the database session
 
 @app.on_event("startup")
 async def startup_event():

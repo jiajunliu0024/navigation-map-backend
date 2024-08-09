@@ -12,13 +12,6 @@ from models.petrol_station_model import PetrolStation
 from models.petrol_price_model import Petrol
 
 
-# def get_db():
-#     db = SessionLocal()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
-
 def get_petrol_station(db: Session, station_id: int):
     return db.query(PetrolStation).filter(PetrolStation.id == station_id).first()
 
@@ -38,7 +31,7 @@ def update_petrol_and_petrol_station_data(petrol_spy_json):
             else:
                 petrol_station_crud.create_petrol_station(db, petrol_station)
             insert_petrol_prices_data(db, station['prices'], station['id'])
-    except e:
+    except Exception as e:
         print(e)
 
 
