@@ -7,7 +7,7 @@ from schemas import petrol_station_schema
 from crud import petrol_station_crud
 from database import SessionLocal
 from schemas.response_body import ResponseBody
-from services.petrol_station_service import get_station_by_route
+from services.petrol_station_service import get_station_by_route, get_by_pass_info
 
 router = APIRouter()
 
@@ -32,6 +32,19 @@ def read_petrol_station(petrol_station_id: int, db: Session = Depends(get_db)):
     if read_petrol_station is None:
         raise HTTPException(status_code=404, detail="Petrol not found")
     return read_petrol_station
+
+
+@router.get("/petrol-station/detour")
+def get_petrol_station_by_box(src_lat: float = Query(..., alias="srcLat", description="Source latitude"),
+                              src_lng: float = Query(..., alias="srcLng", description="Source longitude"),
+                              des_lat: float = Query(..., alias="desLat", description="Destination latitude"),
+                              des_lng: float = Query(..., alias="desLng", description="Destination longitude"),
+                              station_id: str = Query(..., alias="stationId", description="Station ID"),
+                              petrol_type: str = Query(..., alias="petrolType", description="Type of station"),
+                              db: Session = Depends(get_db)):
+    by_pass_info = get_by_pass_info(db, src_lat, src_lng, des_lat, des_lng, station_id, petrol_type)
+    result = ResponseBody(body=by_pass_info, message="success", size=0, code=200)
+    return result
 
 
 @router.get("/petrol-station")

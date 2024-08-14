@@ -1,7 +1,41 @@
 from crud import petrol_station_crud, petrol_price_crud
-from requsts.google_map_request import get_direction_points
+from crud.petrol_station_crud import get_petrol_station_id
+from requsts.google_map_request import get_direction_points, get_direction_info, get_direction_info_with_waypoints
 from schemas.bounding_box import BoundingBox
 import math
+
+
+def get_by_pass_info(db, src_lat, src_lon, dest_lat, dest_lon, station_id, petrol_type):
+    origin_direction = get_direction_info(src_lat, src_lon, dest_lat, dest_lon)
+    # get the current by pass direction
+    src_point = str(src_lat) + "," + str(src_lon)
+    des_point = str(dest_lat) + "," + str(dest_lon)
+
+    petrol_station = get_petrol_station_id(db, station_id)
+    way_point = str(petrol_station.location_y) + "," + str(petrol_station.location_x)
+
+    by_pass_direction = get_direction_info_with_waypoints(src_point, des_point, way_point)
+    for petrol in petrol_station.petrol_list:
+        if petrol_type == petrol.type:
+            petrol_price = petrol.amount
+            break
+    origin_km = get_km_from_direction(origin_direction)
+    by_pass_km = get_km_from_direction(by_pass_direction)
+
+    different_km = by_pass_km - origin_km
+    cost = different_km * petrol_price / 100
+    by_pass_info = {"distance": round(different_km, 3), "cost": round(cost, 3), "price": petrol_price}
+    return by_pass_info
+
+
+def get_km_from_direction(directions_data):
+    total_distance = 0
+    for route in directions_data['routes']:
+        for leg in route['legs']:
+            total_distance += leg['distance']['value']  # Distance in meters
+        # Convert meters to kilometers
+    total_distance_km = total_distance / 1000
+    return total_distance_km
 
 
 def get_station_by_route(db, src_lat, src_lon, dest_lat, dest_lon):
@@ -16,22 +50,6 @@ def get_station_by_route(db, src_lat, src_lon, dest_lat, dest_lon):
         petrol_station_box_list.extend(per_petrol_station_list)
     for petrol_station in petrol_station_box_list:
         petrol_station_dict[petrol_station.id] = petrol_station
-
-    # filter_petrol_station_ids = list(petrol_station_dict.keys())
-    #
-    # # get the petrol by station id
-    # petrol_list = petrol_price_crud.get_petrol_by_station_ids(db, filter_petrol_station_ids)
-    #
-    # petrol_dict = {}
-    #
-    # for petrol in petrol_list:
-    #     if petrol_dict.get(petrol.gas_station_id):
-    #         petrol_dict[petrol.gas_station_id].append(petrol)
-    #     else:
-    #         petrol_dict[petrol.gas_station_id] = [petrol]
-    #
-    # for station_id in petrol_dict.keys():
-    #     petrol_station_dict[station_id].petrol_list = petrol_dict[station_id]
 
     filter_petrol_station = list(petrol_station_dict.values())
     return filter_petrol_station

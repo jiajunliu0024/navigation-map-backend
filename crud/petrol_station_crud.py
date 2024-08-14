@@ -9,7 +9,9 @@ from schemas.petrol_station_schema import PetrolStationWithPetrol
 
 
 def get_petrol_station_id(db: Session, petrol_station_id: int):
-    return db.query(PetrolStation).filter(PetrolStation.id == petrol_station_id).first()
+    return db.query(PetrolStation).options(joinedload
+                                           (PetrolStation.petrol_list)).filter(
+        PetrolStation.id.__eq__(petrol_station_id)).first()
 
 
 def get_petrol_station_by_bounding_box(db: Session, box: BoundingBox):
