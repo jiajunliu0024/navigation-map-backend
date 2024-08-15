@@ -7,9 +7,13 @@ from api.petrol_price_api import router as petrol_price_router
 
 app = FastAPI()
 
+origins = [
+    "https://main.d2h34inrsqwqbm.amplifyapp.com",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust to your frontend's URL for security
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
