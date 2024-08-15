@@ -4,8 +4,15 @@ import httpx
 import polyline
 
 # Load API key from environment variable
-GOOGLE_API_KEY = "AIzaSyA6d7pIq9TszfM0M6pIosMT1flSKr5o8oM"
-GOOGLE_DIRECTIONS_URL = "https://maps.googleapis.com/maps/api/directions/json"
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Access environment variables
+google_api_key = os.getenv('GOOGLE_API_KEY')
+google_directions_url = os.getenv('GOOGLE_DIRECTIONS_URL')
 
 
 def get_direction_points(start_lat: float, start_lng: float, end_lat: float, end_lng: float):
@@ -15,12 +22,12 @@ def get_direction_points(start_lat: float, start_lng: float, end_lat: float, end
 
 
 def get_direction_info(start_lat: float, start_lng: float, end_lat: float, end_lng: float):
-    if not GOOGLE_API_KEY:
+    if not google_api_key:
         raise HTTPException(status_code=500, detail="API key is not set")
 
     with httpx.Client() as client:
         # Construct the request URL with latitude and longitude
-        url = f"{GOOGLE_DIRECTIONS_URL}?origin={start_lat},{start_lng}&destination={end_lat},{end_lng}&key={GOOGLE_API_KEY}"
+        url = f"{google_directions_url}?origin={start_lat},{start_lng}&destination={end_lat},{end_lng}&key={google_api_key}"
 
         # Make the request to Google Maps Directions API
         response = client.get(url)
@@ -41,7 +48,7 @@ def get_direction_info_with_waypoints(origin, destination, waypoint):
         'origin': origin,
         'destination': destination,
         'waypoints': waypoint,
-        'key': GOOGLE_API_KEY,
+        'key': google_api_key,
         'mode': 'driving',  # You can change this to 'walking', 'bicycling', or 'transit'
         'optimize': 'true'  # Optional: Optimize the waypoints order
     }
