@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
@@ -24,27 +26,34 @@ def update_petrol_and_petrol_station_data(petrol_spy_json):
     db = SessionLocal()
     try:
         petrol_station_list = petrol_spy_json['message']['list']
+        petrol_station_index = 0
         for station in petrol_station_list:
             petrol_station = init_petrol_station_with_data(station)
             if get_petrol_station(db, petrol_station.id):
                 petrol_station_crud.update_petrol_station(db, petrol_station.id, petrol_station)
+                print("update petrol station", petrol_station_index)
             else:
                 petrol_station_crud.create_petrol_station(db, petrol_station)
+                print("create petrol station", petrol_station_index)
             insert_petrol_prices_data(db, station['prices'], station['id'])
+            petrol_station_index += 1
     except Exception as e:
         print(e)
 
 
 def insert_petrol_prices_data(db, prices, station_id):
     price_list = list(prices.values())
+    petrol_index = 0
     for price in price_list:
         cur_petrol = init_petrol_with_data(price, station_id)
         prev_petrol = get_petrol_price_by_station_id_and_type(db, price.get('stationId'), price.get('type'))
         if prev_petrol:
             petrol_price_crud.update_petrol(db, cur_petrol, prev_petrol)
+            print("update petrol station", petrol_index)
         else:
             petrol_price_crud.create_petrol(db, cur_petrol)
-
+            print("create petrol station", petrol_index)
+        petrol_index += 1
 
 def init_petrol_station_with_data(station):
     petrol_station = PetrolStationCreateOrUpdate(
@@ -59,6 +68,7 @@ def init_petrol_station_with_data(station):
         phone=station.get('phone', 'none'),
         location_x=station['location']['x'],
         location_y=station['location']['y'],
+        petrol_list=[],
         eft_ops=1 if station.get('eftops', 'False') == 'True' else 0,
         truck_park=1 if station.get('truckpark', 'False') == 'True' else 0,
         restrooms=1 if station.get('restrooms', 'False') == 'True' else 0,

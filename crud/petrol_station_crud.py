@@ -69,10 +69,12 @@ def update_petrol_station(db: Session, petrol_station_id: int,
     db_petrol_station = db.query(PetrolStation).filter(PetrolStation.id == petrol_station_id).first()
     if db_petrol_station:
         for key, value in petrol_station.dict().items():
-            setattr(db_petrol_station, key, value)
+            if key != 'petrol_list':
+                setattr(db_petrol_station, key, value)
         db.commit()
         db.refresh(db_petrol_station)
         return db_petrol_station
+    print("update petrol station")
     return None
 
 
