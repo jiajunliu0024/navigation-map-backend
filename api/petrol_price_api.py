@@ -5,9 +5,10 @@ from sqlalchemy.orm import Session
 
 from schemas import petrol_price_schema
 from crud import petrol_price_crud
-from database import engine, SessionLocal, Base
+from database import SessionLocal
 
 router = APIRouter()
+
 
 def get_db():
     db = SessionLocal()
@@ -33,14 +34,6 @@ def read_petrol(petrol_id: int, db: Session = Depends(get_db)):
 @router.get("/petrol/", response_model=list[petrol_price_schema.Petrol])
 def read_list_petrol(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     return petrol_price_crud.page_petrol(db, skip=skip, limit=limit)
-
-
-# @router.put("/petrol/{petrol_id}", response_model=petrol_price_schema.Petrol)
-# def update_petrol(petrol_id: int, petrol: petrol_price_schema.PetrolCreateOrUpdate, db: Session = Depends(get_db)):
-#     updated_petrol = petrol_price_crud.update_petrol(db, petrol_id, petrol)
-#     if updated_petrol is None:
-#         raise HTTPException(status_code=404, detail="Petrol not found")
-#     return updated_petrol
 
 
 @router.delete("/petrol/{petrol_id}", response_model=petrol_price_schema.Petrol)
