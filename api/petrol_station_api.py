@@ -7,7 +7,7 @@ from schemas import petrol_station_schema
 from crud import petrol_station_crud
 from database import SessionLocal
 from schemas.response_body import ResponseBody
-from services.petrol_station_service import get_station_by_route, get_by_pass_info
+from services.petrol_station_service import get_station_by_route, get_by_pass_info, get_servo_by_map
 
 router = APIRouter()
 
@@ -44,6 +44,17 @@ def get_petrol_station_by_box(src_lat: float = Query(..., alias="srcLat", descri
                               db: Session = Depends(get_db)):
     by_pass_info = get_by_pass_info(db, src_lat, src_lng, des_lat, des_lng, station_id, petrol_type)
     result = ResponseBody(body=by_pass_info, message="success", size=0, code=200)
+    return result
+
+
+@router.get("/petrol-station/map")
+def get_petrol_station_by_box(sw_lat: float = Query(..., alias="swLat", description="Source latitude"),
+                              sw_lng: float = Query(..., alias="swLng", description="Source longitude"),
+                              ne_lat: float = Query(..., alias="neLat", description="Destination latitude"),
+                              ne_lng: float = Query(..., alias="neLng", description="Destination longitude"),
+                              db: Session = Depends(get_db)):
+    servo = get_servo_by_map(db, sw_lat, sw_lng, ne_lat, ne_lng);
+    result = ResponseBody(body=servo, message="success", size=len(servo), code=200)
     return result
 
 

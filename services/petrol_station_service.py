@@ -5,6 +5,11 @@ from schemas.bounding_box import BoundingBox
 import math
 
 
+def get_servo_by_map(db, sw_lat, sw_lng, ne_lat, ne_lng):
+    box = BoundingBox(sw_lat=sw_lat, ne_lat=ne_lat, sw_lng=sw_lng, ne_lng=ne_lng)
+    return petrol_station_crud.get_petrol_station_by_bounding_box(db, box)
+
+
 def get_by_pass_info(db, src_lat, src_lon, dest_lat, dest_lon, station_id, petrol_type):
     origin_direction = get_direction_info(src_lat, src_lon, dest_lat, dest_lon)
     # get the current by pass direction

@@ -13,7 +13,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 app = FastAPI()
 
 origins = [
-    "https://main.d2h34inrsqwqbm.amplifyapp.com",
+    "*",
 ]
 # Scheduler setup
 scheduler = AsyncIOScheduler()
