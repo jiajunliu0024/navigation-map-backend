@@ -18,6 +18,11 @@ def get_db():
         db.close()
 
 
+@router.get("/")
+def test():
+    print("msg accepted")
+
+
 @router.post("/petrol/", response_model=petrol_price_schema.Petrol)
 def create_petrol(petrol: petrol_price_schema.PetrolCreateOrUpdate, db: Session = Depends(get_db)):
     return petrol_price_crud.create_petrol(db=db, petrol=petrol)
