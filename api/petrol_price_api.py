@@ -20,7 +20,7 @@ def get_db():
 
 @router.get("/")
 def test():
-    print("msg accepted")
+    return "accepted";
 
 
 @router.post("/petrol/", response_model=petrol_price_schema.Petrol)
