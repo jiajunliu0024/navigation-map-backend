@@ -1,5 +1,3 @@
-from contextlib import asynccontextmanager
-
 from fastapi import Depends, HTTPException, APIRouter, Query
 from sqlalchemy.orm import Session
 
@@ -83,9 +81,4 @@ def update_petrol(petrol_station_id: int, petrol_station: petrol_station_schema.
     return updated_petrol_station
 
 
-@router.delete("/petrolStation/{petrol_station_id}", response_model=petrol_station_schema.PetrolStation)
-def delete_petrol(petrol_station_id: int, db: Session = Depends(get_db)):
-    deleted_petrol_station = petrol_station_crud.delete_petrol_station(db, petrol_station_id)
-    if deleted_petrol_station is None:
-        raise HTTPException(status_code=404, detail="Petrol not found")
-    return deleted_petrol_station
+
