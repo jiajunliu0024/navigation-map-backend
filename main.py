@@ -1,7 +1,7 @@
 import logging
 
 from fastapi import FastAPI
-from starlette.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 
 from database import engine, Base
 from api.petrol_station_api import router as petrol_station_router
@@ -30,6 +30,16 @@ app.include_router(petrol_price_router, prefix="/api/v1", tags=["Petrol Price"])
 
 # Scheduler setup
 scheduler = AsyncIOScheduler()
+
+
+@app.middleware("http")
+async def add_cors_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    return response
 
 
 @app.on_event("startup")
