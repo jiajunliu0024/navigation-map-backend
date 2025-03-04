@@ -1,6 +1,9 @@
 import requests
+import logging
 
 from services.fetch_station_service import update_petrol_and_petrol_station_data
+
+logger = logging.getLogger(__name__)
 
 
 def fetch(params):
@@ -32,10 +35,10 @@ def init_param(line):
     return param_dict
 
 
-def read_local_spy_petrol_file():
-    # read the hub file to fetch the data
+async def read_local_spy_petrol_file():
     try:
-        # Open the file in read mode
+        logger.info("Starting petrol data fetch task")
+        # read the hub file to fetch the data
         with open('./petrol_spy.txt', 'r') as file:
             # Read the entire content of the file
             for line in file:
@@ -43,8 +46,7 @@ def read_local_spy_petrol_file():
                     param = init_param(line)
                     petro_spy_json = fetch(param)
                     update_petrol_and_petrol_station_data(petro_spy_json)
-
-    except FileNotFoundError:
-        print("The file was not found.")
-    except Exception:
-        print("Something went wrong.")
+        logger.info("Completed petrol data fetch task")
+    except Exception as e:
+        logger.error(f"Error in petrol data fetch task: {e}")
+        raise

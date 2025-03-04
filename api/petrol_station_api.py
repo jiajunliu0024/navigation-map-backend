@@ -7,7 +7,11 @@ from database import SessionLocal
 from schemas.response_body import ResponseBody
 from services.petrol_station_service import get_station_by_route, get_by_pass_info, get_servo_by_map
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/petrol-station",
+    tags=["Petrol Stations"],
+    responses={404: {"description": "Not found"}},
+)
 
 
 def get_db():
@@ -18,13 +22,13 @@ def get_db():
         db.close()
 
 
-@router.post("/petrolStation/", response_model=petrol_station_schema.PetrolStation)
+@router.post("/", response_model=petrol_station_schema.PetrolStation)
 def create_petrol_station(petrol_station: petrol_station_schema.PetrolStationCreateOrUpdate,
                           db: Session = Depends(get_db)):
     return petrol_station_crud.create_petrol_station(db=db, petrol_station=petrol_station)
 
 
-@router.get("/petrolStation/{petrol_station_id}", response_model=petrol_station_schema.PetrolStation)
+@router.get("/{petrol_station_id}", response_model=petrol_station_schema.PetrolStation)
 def read_petrol_station(petrol_station_id: int, db: Session = Depends(get_db)):
     db_petrol_station = petrol_station_crud.get_petrol_station_id(db, petrol_station_id=petrol_station_id)
     if read_petrol_station is None:
@@ -32,7 +36,7 @@ def read_petrol_station(petrol_station_id: int, db: Session = Depends(get_db)):
     return read_petrol_station
 
 
-@router.get("/petrol-station/detour")
+@router.get("/route/detour")
 def get_petrol_station_by_box(src_lat: float = Query(..., alias="srcLat", description="Source latitude"),
                               src_lng: float = Query(..., alias="srcLng", description="Source longitude"),
                               des_lat: float = Query(..., alias="desLat", description="Destination latitude"),

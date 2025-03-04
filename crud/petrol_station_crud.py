@@ -46,7 +46,7 @@ def get_petrol_station_by_bounding_boxes_paginated(db: Session, boxes: list, bat
         batch_results = query.all()
         petrol_station_box_list.extend(batch_results)
 
-    # Remove duplicates if necessary
+    # Remove duplicates from the result list
     unique_petrol_station_box_list = list({station.id: station for station in petrol_station_box_list}.values())
 
     return unique_petrol_station_box_list
@@ -57,11 +57,15 @@ def page_petrol_station(db: Session, skip: int = 0, limit: int = 10):
 
 
 def create_petrol_station(db: Session, petrol_station: petrol_station_schema.PetrolStationCreateOrUpdate):
-    db_petrol_station = PetrolStation(**petrol_station.dict())
-    db.add(db_petrol_station)
+    # Convert Pydantic model to dictionary
+    station_data = petrol_station.model_dump()
+    
+    # Create SQLAlchemy model instance
+    db_station = PetrolStation(**station_data)
+    db.add(db_station)
     db.commit()
-    db.refresh(db_petrol_station)
-    return db_petrol_station
+    db.refresh(db_station)
+    return db_station
 
 
 def update_petrol_station(db: Session, petrol_station_id: int,

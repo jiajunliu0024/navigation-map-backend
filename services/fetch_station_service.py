@@ -26,19 +26,27 @@ def update_petrol_and_petrol_station_data(petrol_spy_json):
     db = SessionLocal()
     try:
         petrol_station_list = petrol_spy_json['message']['list']
-        petrol_station_index = 0
-        for station in petrol_station_list:
+        for index, station in enumerate(petrol_station_list):
             petrol_station = init_petrol_station_with_data(station)
-            if get_petrol_station(db, petrol_station.id):
+            
+            # Check if station exists
+            existing_station = get_petrol_station(db, petrol_station.id)
+            if existing_station:
+                # Update existing record
                 petrol_station_crud.update_petrol_station(db, petrol_station.id, petrol_station)
-                print("update petrol station", petrol_station_index)
+                print(f"Updated petrol station {index}")
             else:
+                # Create new record
                 petrol_station_crud.create_petrol_station(db, petrol_station)
-                print("create petrol station", petrol_station_index)
+                print(f"Created petrol station {index}")
+                
+            # Process price data
             insert_petrol_prices_data(db, station['prices'], station['id'])
-            petrol_station_index += 1
     except Exception as e:
-        print(e)
+        print(f"Error: {e}")
+        raise
+    finally:
+        db.close()
 
 
 def insert_petrol_prices_data(db, prices, station_id):
@@ -63,17 +71,17 @@ def init_petrol_station_with_data(station):
         state=station['state'],
         suburb=station['suburb'],
         address=station['address'],
-        postCode=station['postCode'],
+        postcode=station['postCode'],
         country=station['country'],
         phone=station.get('phone', 'none'),
         location_x=station['location']['x'],
         location_y=station['location']['y'],
         petrol_list=[],
-        eft_ops=1 if station.get('eftops', 'False') == 'True' else 0,
-        truck_park=1 if station.get('truckpark', 'False') == 'True' else 0,
-        restrooms=1 if station.get('restrooms', 'False') == 'True' else 0,
-        accessible=1 if station.get('accessible', 'False') == 'True' else 0,
-        open24=1 if station.get('open24', 'False') == 'True' else 0,
+        eft_ops=station.get('eftops'),
+        truck_park=station.get('truckpark'),
+        restrooms=station.get('restrooms'),
+        accessible=station.get('accessible'),
+        open24=station.get('open24'),
     )
     return petrol_station
 

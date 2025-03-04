@@ -3,10 +3,13 @@ from pydantic import BaseModel
 
 class PetrolBase(BaseModel):
     id: str
-    type: str
-    amount: float
     gas_station_id: str
+    type: str
     updated: int
+    amount: float
+
+    class Config:
+        from_attributes = True
 
 
 class PetrolCreateOrUpdate(PetrolBase):

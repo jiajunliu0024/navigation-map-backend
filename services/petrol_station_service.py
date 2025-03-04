@@ -3,6 +3,12 @@ from crud.petrol_station_crud import get_petrol_station_id
 from requsts.google_map_request import get_direction_points, get_direction_info, get_direction_info_with_waypoints
 from schemas.bounding_box import BoundingBox
 import math
+import logging
+from typing import List
+from sqlalchemy.orm import Session
+from utils.exceptions import InvalidCoordinatesException
+
+logger = logging.getLogger(__name__)
 
 
 def get_servo_by_map(db, sw_lat, sw_lng, ne_lat, ne_lng):
@@ -43,21 +49,32 @@ def get_km_from_direction(directions_data):
     return total_distance_km
 
 
-def get_station_by_route(db, src_lat, src_lon, dest_lat, dest_lon):
-    # TODO: increase the efficiency on querying petrol station
-    points = get_direction_points(src_lat, src_lon, dest_lat, dest_lon)
-    boxes = computer_bounding_boxes(points, 500)
-    petrol_station_box_list = []
-    petrol_station_dict = {}
-    # petrol_station_crud.get_petrol_station_by_bounding_boxes_paginated(db, boxes, 50)
-    for bounding in boxes:
-        per_petrol_station_list = petrol_station_crud.get_petrol_station_by_bounding_box(db, bounding)
-        petrol_station_box_list.extend(per_petrol_station_list)
-    for petrol_station in petrol_station_box_list:
-        petrol_station_dict[petrol_station.id] = petrol_station
+def get_station_by_route(db: Session, src_lat: float, src_lng: float, 
+                        des_lat: float, des_lng: float) -> List:
+    try:
+        logger.info(f"Fetching stations for route from ({src_lat},{src_lng}) to ({des_lat},{des_lng})")
+        # Validate coordinates
+        if not (-90 <= src_lat <= 90) or not (-90 <= des_lat <= 90):
+            raise InvalidCoordinatesException()
+            
+        # TODO: increase the efficiency on querying petrol station
+        points = get_direction_points(src_lat, src_lng, des_lat, des_lng)
+        boxes = computer_bounding_boxes(points, 500)
+        petrol_station_box_list = []
+        petrol_station_dict = {}
+        # petrol_station_crud.get_petrol_station_by_bounding_boxes_paginated(db, boxes, 50)
+        for bounding in boxes:
+            per_petrol_station_list = petrol_station_crud.get_petrol_station_by_bounding_box(db, bounding)
+            petrol_station_box_list.extend(per_petrol_station_list)
+        for petrol_station in petrol_station_box_list:
+            petrol_station_dict[petrol_station.id] = petrol_station
 
-    filter_petrol_station = list(petrol_station_dict.values())
-    return filter_petrol_station
+        filter_petrol_station = list(petrol_station_dict.values())
+        return filter_petrol_station
+
+    except Exception as e:
+        logger.error(f"Error fetching stations: {str(e)}")
+        raise
 
 
 def computer_bounding_boxes(points, range_meters):
