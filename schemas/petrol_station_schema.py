@@ -17,11 +17,11 @@ class PetrolStationBase(BaseModel):
     phone: str
     location_x: float
     location_y: float
-    eft_ops: bool
-    truck_park: bool
-    restrooms: bool
-    accessible: bool
-    open24: bool
+    eft_ops: str
+    truck_park: str
+    restrooms: str
+    accessible: str
+    open24: str
     petrol_list: List[Petrol]
 
     class Config:

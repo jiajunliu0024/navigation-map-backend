@@ -77,11 +77,11 @@ def init_petrol_station_with_data(station):
         location_x=station['location']['x'],
         location_y=station['location']['y'],
         petrol_list=[],
-        eft_ops=station.get('eftops'),
-        truck_park=station.get('truckpark'),
-        restrooms=station.get('restrooms'),
-        accessible=station.get('accessible'),
-        open24=station.get('open24'),
+        eft_ops=str(station.get('eftops', 'False')),
+        truck_park=str(station.get('truckpark', 'False')),
+        restrooms=str(station.get('restrooms', 'False')),
+        accessible=str(station.get('accessible', 'False')),
+        open24=str(station.get('open24', 'False')),
     )
     return petrol_station
 
